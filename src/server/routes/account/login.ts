@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { userDb } from '../../../database';
+import { db } from '../../../database';
 import bcrypt from 'bcrypt';
 import { generateTokens } from '../utils';
 
@@ -10,7 +10,7 @@ router.post('/', async (req: Request, res: Response) => {
   //Check for user
   try {
     const checkUserQuery = `SELECT * FROM users WHERE username = $1`;
-    const { rows: users } = await userDb.query(checkUserQuery, [username]);
+    const { rows: users } = await db.query(checkUserQuery, [username]);
     if (users.length === 0) {
       res.status(200).send({ error: 'Username not found' });
       return;

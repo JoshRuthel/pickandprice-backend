@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
-import { userDb } from '../../../database';
+import { db } from '../../../database';
 import { v4 as uuid } from 'uuid';
 import { generateTokens } from '../utils';
 
@@ -11,7 +11,7 @@ router.post('/', async (req: Request, res: Response) => {
   try {
     // Check if username or email exists
     const checkUserQuery = `SELECT * FROM users WHERE username = $1 OR email = $2`;
-    const { rows: users } = await userDb.query(checkUserQuery, [username, email]);
+    const { rows: users } = await db.query(checkUserQuery, [username, email]);
     if (users.length > 0) {
       const existingMetric =
         users[0].username === username ? 'Username' : 'Email';
@@ -31,7 +31,7 @@ router.post('/', async (req: Request, res: Response) => {
     const passwordHash = await bcrypt.hash(password, 10);
     const id = uuid();
     const insertUserQuery = `INSERT INTO users (id, first_name, last_name, username, email, password_hash) VALUES ($1, $2, $3, $4, $5, $6)`;
-    await userDb.query(insertUserQuery, [
+    await db.query(insertUserQuery, [
       id,
       firstName,
       lastName,

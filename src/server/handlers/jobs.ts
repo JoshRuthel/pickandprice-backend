@@ -1,11 +1,10 @@
 import { ProductDBProvider } from "../providers/ProductDBProvider";
 import { JobParams, JobType } from "./types";
-import { mapProductCategories } from "./utils";
 
 
 export async function fetchProductMapping(params: JobParams[JobType.PRODUCT_MAPPING], db: ProductDBProvider) {
-    const productResult = await db.getProductCategories()
-    return mapProductCategories(productResult)
+    const productResult = await db.getProductMapping()
+    return productResult
 }
 
 export async function fetchByName(params: JobParams[JobType.NAME_SEARCH], db: ProductDBProvider) {
@@ -47,7 +46,7 @@ export async function fetchAndRankByCategory(params: JobParams[JobType.CATEGORY_
         bestPriceProductAmount: Infinity
     }
 
-    if (result.products) {
+    if (result.products && result.products.length) {
         let bestValueProduct = {}
         for (const product of result.products) {
             const value = (product.price) / (product.category_unit_volume)
@@ -58,8 +57,8 @@ export async function fetchAndRankByCategory(params: JobParams[JobType.CATEGORY_
             }
         }
         const sortedProducts = result.products.sort((a, b) => a.price - b.price)
-        rankingDetails.bestPriceProductId = result.products[0].id
-        rankingDetails.bestPriceProductAmount = result.products[0].price
+        rankingDetails.bestPriceProductId = result.products[0]?.id
+        rankingDetails.bestPriceProductAmount = result.products[0]?.price
         const rankedProducts = [sortedProducts[0]]
         if(rankingDetails.bestPriceProductId != rankingDetails.bestValueProductId) {
             rankedProducts.push(bestValueProduct)

@@ -1,6 +1,7 @@
-import { productDb } from "../../database";
-import { Stores } from "../../types";
+import { Pool } from "pg";
+import { db } from "../../database";
 import { getListQuery } from "./productUtils";
+import { mapProductCategories } from "../handlers/utils";
 
 type CategoryGroupResult = {
   category: string,
@@ -10,30 +11,42 @@ type CategoryGroupResult = {
 }
 
 export class ProductDBProvider {
-  constructor() { }
+  constructor() {}
+
+  async getProducts() {
+    const productQuery = 'SELECT * from products WHERE is_valid_volume AND is_valid_category AND price IS NOT NULL'
+    const insertMapQuery = 'INSERT INTO product_mapping (data) VALUES ($1)'
+    try {
+      const {rows: products} = await db.query(productQuery)
+      const product_cat = mapProductCategories(products)
+      if(!('error' in product_cat)) {
+        await db.query(insertMapQuery, [product_cat])
+      }
+      return product_cat
+    } catch (e) {
+      console.error(e)
+      return {error: e}
+    }
+  }
+
+  async getProductMapping() {
+    const productMapQuery = 'SELECT data from product_mapping LIMIT 1'
+    try {
+      const {rows: productMapping} = await db.query(productMapQuery)
+      return productMapping[0].data
+    } catch (e) {
+      console.error(e)
+      return {error: e}
+    }
+  }
 
   async getProductBrands() {
     const brandQuery = `SELECT * from product_brands`
     try {
-      const { rows: brands } = await productDb.query(brandQuery);
+      const { rows: brands } = await db.query(brandQuery);
       return brands
     } catch (e) {
-      console.log(e)
-      return { error: e };
-    }
-  }
-
-  async getProductCategories(): Promise<CategoryGroupResult[] | { error: unknown }> {
-    const mappingQuery = `
-      SELECT *
-      FROM product_mapping_test
-      ORDER BY category    
-    `;
-    try {
-      const { rows: categories } = await productDb.query(mappingQuery);
-      return categories
-    } catch (e) {
-      console.log(e)
+      console.error(e)
       return { error: e };
     }
   }
@@ -41,16 +54,18 @@ export class ProductDBProvider {
   async getProductsByName(name: string) {
     const query = `
       SELECT *
-      FROM products_test
+      FROM products
       WHERE title ILIKE $1
+      AND is_valid_category
+      AND is_valid_volume
       ORDER BY SIMILARITY(title, $2) DESC
       LIMIT 10;
     `;
     try {
-      const { rows: products } = await productDb.query(query, [`%${name}%`, name]);
+      const { rows: products } = await db.query(query, [`%${name}%`, name]);
       return { products };
     } catch (e) {
-      console.log(e)
+      console.error(e)
       return { error: e };
     }
   }
@@ -68,9 +83,11 @@ export class ProductDBProvider {
     let index = 2;
     let query = `
     SELECT *
-    FROM products_test
+    FROM products
     WHERE category = $1
     AND price IS NOT NULL
+    AND is_valid_category
+    AND is_valid_volume
   `;
     if(subCategory) {
       query += ` AND sub_category = $${index++}`
@@ -95,7 +112,7 @@ export class ProductDBProvider {
       values.push(...selectedStores)
     }
     try {
-      const { rows: products } = await productDb.query(query, values);
+      const { rows: products } = await db.query(query, values);
       return { products };
     } catch {
       return { error: "An error occurred" };

@@ -32,5 +32,5 @@ export type JobRequest<T extends JobType> = Request & {
   };
 };
 
-export type CategoryMapping = {[key:string]: {sub_categories: {[key: string]: {[key: string]: string[]}}, unit: string}}
+export type CategoryMapping = {[key:string]: {sub_categories: {[key: string]: {[key: string]: {[key: string]: true}}}, unit: string}}
 export type BrandMapping = {[key: string]: string[]}

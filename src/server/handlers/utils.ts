@@ -5,10 +5,11 @@ export function mapProductCategories(productResult: {error: unknown} | any[]) {
         return productResult
     }
     const productMapping: CategoryMapping = {}
-    for(const group of productResult) {
-        if(!productMapping[group.category]) productMapping[group.category] = {sub_categories: {}, unit: group.category_unit}
-        if(!productMapping[group.category].sub_categories[group.sub_category]) productMapping[group.category].sub_categories[group.sub_category] = {}
-        productMapping[group.category].sub_categories[group.sub_category][group.store] = group.brands
+    for(const product of productResult) {
+        if(!productMapping[product.category]) productMapping[product.category] = {sub_categories: {}, unit: product.category_unit}
+        if(!productMapping[product.category].sub_categories[product.sub_category]) productMapping[product.category].sub_categories[product.sub_category] = {}
+        if(!productMapping[product.category].sub_categories[product.sub_category][product.store]) productMapping[product.category].sub_categories[product.sub_category][product.store] = {}
+        productMapping[product.category].sub_categories[product.sub_category][product.store][product.brand] = true
     }
     return productMapping
 }
