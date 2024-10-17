@@ -40,6 +40,17 @@ export class ProductDBProvider {
     }
   }
 
+  async flagProduct(id: string) {
+    const flagQuery = 'UPDATE products SET is_flagged = true WHERE id = $1'
+    try {
+      await db.query(flagQuery, [id])
+      return {}
+    } catch (e) {
+      console.error(e)
+      return {error: e}
+    }
+  }
+
   async getProductBrands() {
     const brandQuery = `SELECT * from product_brands`
     try {

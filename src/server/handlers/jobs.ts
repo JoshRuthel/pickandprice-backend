@@ -27,6 +27,12 @@ export async function fetchByCategory(params: JobParams[JobType.CATEGORY_SEARCH]
     return result;
 }
 
+export async function flagProduct(params: JobParams[JobType.FLAG_PRODUCT], db: ProductDBProvider) {
+    const {id} = params
+    const result = await db.flagProduct(id)
+    return result
+}
+
 export async function fetchAndRankByCategory(params: JobParams[JobType.CATEGORY_SEARCH], db: ProductDBProvider) {
     const { category, subCategory, brands, stores, minVolume, maxVolume } =
         params;
@@ -73,5 +79,6 @@ export const JobMapper: any = {
     [JobType.PRODUCT_MAPPING]: fetchProductMapping,
     [JobType.NAME_SEARCH]: fetchByName,
     [JobType.CATEGORY_SEARCH]: fetchByCategory,
-    [JobType.CATEGORY_RANK]: fetchAndRankByCategory
+    [JobType.CATEGORY_RANK]: fetchAndRankByCategory,
+    [JobType.FLAG_PRODUCT]: flagProduct
 }
