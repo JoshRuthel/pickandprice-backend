@@ -14,9 +14,10 @@ export async function fetchByName(params: JobParams[JobType.NAME_SEARCH], db: Pr
 }
 
 export async function fetchByCategory(params: JobParams[JobType.CATEGORY_SEARCH], db: ProductDBProvider) {
-    const { category, subCategory, brands, stores, minVolume, maxVolume } =
+    const { id, category, subCategory, brands, stores, minVolume, maxVolume } =
         params;
     const result = await db.getProductsByCategory(
+        id,
         category,
         subCategory,
         brands,
@@ -34,9 +35,10 @@ export async function flagProduct(params: JobParams[JobType.FLAG_PRODUCT], db: P
 }
 
 export async function fetchAndRankByCategory(params: JobParams[JobType.CATEGORY_SEARCH], db: ProductDBProvider) {
-    const { category, subCategory, brands, stores, minVolume, maxVolume } =
+    const { id, category, subCategory, brands, stores, minVolume, maxVolume } =
         params;
     const result = await db.getProductsByCategory(
+        id, 
         category,
         subCategory,
         brands,

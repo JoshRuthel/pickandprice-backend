@@ -3,6 +3,7 @@ type NameParams = { name: string };
 type FlagParams = {id: string}
 
 type CategoryParams = {
+  id: string | null;
   category: string;
   subCategory: string;
   brands: string[];
