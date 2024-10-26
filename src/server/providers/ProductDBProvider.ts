@@ -74,7 +74,7 @@ export class ProductDBProvider {
   }
 
   async getProductsByCategory(
-    id: string | null,
+    barcode: string | null,
     category: string,
     subCategory: string,
     brands: string[],
@@ -85,9 +85,9 @@ export class ProductDBProvider {
     let query;
     let values: any[] = []
 
-    if (id != null) {
-      query = 'SELECT * from products where id = $1'
-      values = [id]
+    if (barcode != null) {
+      query = 'SELECT * from products where barcode = $1'
+      values = [barcode]
     } else {
       const selectedStores = Object.keys(stores).filter(key => stores[key])
       values = [category]
