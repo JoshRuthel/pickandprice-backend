@@ -5,7 +5,7 @@ type FlagParams = {id: string}
 type CategoryParams = {
   barcode: string | null;
   category: string;
-  subCategory: string;
+  subCategories: string[];
   brands: string[];
   stores: {[key:string]: boolean};
   minVolume: number;

@@ -14,12 +14,12 @@ export async function fetchByName(params: JobParams[JobType.NAME_SEARCH], db: Pr
 }
 
 export async function fetchByCategory(params: JobParams[JobType.CATEGORY_SEARCH], db: ProductDBProvider) {
-    const { barcode, category, subCategory, brands, stores, minVolume, maxVolume } =
+    const { barcode, category, subCategories, brands, stores, minVolume, maxVolume } =
         params;
     const result = await db.getProductsByCategory(
         barcode,
         category,
-        subCategory,
+        subCategories,
         brands,
         stores,
         minVolume,
@@ -35,12 +35,12 @@ export async function flagProduct(params: JobParams[JobType.FLAG_PRODUCT], db: P
 }
 
 export async function fetchAndRankByCategory(params: JobParams[JobType.CATEGORY_SEARCH], db: ProductDBProvider) {
-    const { barcode, category, subCategory, brands, stores, minVolume, maxVolume } =
+    const { barcode, category, subCategories, brands, stores, minVolume, maxVolume } =
         params;
     const result = await db.getProductsByCategory(
         barcode, 
         category,
-        subCategory,
+        subCategories,
         brands,
         stores,
         minVolume,
@@ -57,7 +57,7 @@ export async function fetchAndRankByCategory(params: JobParams[JobType.CATEGORY_
     if (result.products && result.products.length) {
         let bestValueProduct = {}
         for (const product of result.products) {
-            const value = (product.price) / (product.category_unit_volume)
+            const value = (product.price) / (product.category_volume)
             if (value < rankingDetails.bestValueProductAmount) {
                 rankingDetails.bestValueProductId = product.id
                 rankingDetails.bestValueProductAmount = value

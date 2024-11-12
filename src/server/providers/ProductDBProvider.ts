@@ -76,7 +76,7 @@ export class ProductDBProvider {
   async getProductsByCategory(
     barcode: string | null,
     category: string,
-    subCategory: string,
+    subCategories: string[],
     brands: string[],
     stores: { [key: string]: boolean },
     minVolume: number,
@@ -95,21 +95,23 @@ export class ProductDBProvider {
       query = `
           SELECT *
           FROM products
-          WHERE category = $1
-          AND price IS NOT NULL
+          WHERE price IS NOT NULL
           AND is_valid_category
           AND is_valid_volume
+          AND category = $1
       `;
-      if (subCategory) {
-        query += ` AND sub_category = $${index++}`
-        values.push(subCategory)
+      if (subCategories.length) {
+        const subCatQuery = getListQuery(index, subCategories);
+        query += ` AND sub_category in ${subCatQuery}`
+        index += subCategories.length
+        values.push(...subCategories)
       }
       if (maxVolume) {
-        query += ` AND category_unit_volume <= $${index++} `
+        query += ` AND category_volume <= $${index++} `
         values.push(maxVolume)
       }
       if (minVolume) {
-        query += ` AND category_unit_volume >= $${index++} `
+        query += ` AND category_volume >= $${index++} `
         values.push(minVolume)
       }
       if (brands.length) {
@@ -125,6 +127,7 @@ export class ProductDBProvider {
     }
 
     try {
+      console.log(query)
       const { rows: products } = await db.query(query, values);
       return { products };
     } catch {
