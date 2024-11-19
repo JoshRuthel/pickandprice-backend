@@ -127,7 +127,6 @@ export class ProductDBProvider {
     }
 
     try {
-      console.log(query)
       const { rows: products } = await db.query(query, values);
       return { products };
     } catch {

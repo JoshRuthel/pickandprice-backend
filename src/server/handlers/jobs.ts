@@ -50,29 +50,28 @@ export async function fetchAndRankByCategory(params: JobParams[JobType.CATEGORY_
     const rankingDetails = {
         bestValueProductId: null,
         bestValueProductAmount: Infinity,
-        bestPriceProductId: null,
-        bestPriceProductAmount: Infinity
+        averageValueAmount: 0
     }
 
     if (result.products && result.products.length) {
         let bestValueProduct = {}
+        let totalProductValues = 0
         for (const product of result.products) {
             const value = (product.price) / (product.category_volume)
+            totalProductValues += value
             if (value < rankingDetails.bestValueProductAmount) {
                 rankingDetails.bestValueProductId = product.id
                 rankingDetails.bestValueProductAmount = value
                 bestValueProduct = product
             }
         }
-        const sortedProducts = result.products.sort((a, b) => a.price - b.price)
-        rankingDetails.bestPriceProductId = result.products[0]?.id
-        rankingDetails.bestPriceProductAmount = result.products[0]?.price
-        const rankedProducts = [sortedProducts[0]]
-        if(rankingDetails.bestPriceProductId != rankingDetails.bestValueProductId) {
-            rankedProducts.push(bestValueProduct)
-        }
-        rankedProducts.push(...sortedProducts.filter((prod, i) => prod.id != rankingDetails.bestValueProductId && i != 0))
-        result.products = rankedProducts
+        rankingDetails.averageValueAmount = totalProductValues/(result.products.length || 1)
+        const sortedProducts = result.products.sort((a, b) => {
+            const aValue = (a.price) / (a.category_volume)
+            const bValue = (b.price) / (b.category_volume)
+            return aValue - bValue
+        })
+        result.products = sortedProducts
     }
     return {...result, rankingDetails};
 }
