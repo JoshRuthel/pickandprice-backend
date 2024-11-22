@@ -110,10 +110,6 @@ export class ProductDBProvider {
         query += ` AND category_volume <= $${index++} `
         values.push(maxVolume)
       }
-      if (minVolume) {
-        query += ` AND category_volume >= $${index++} `
-        values.push(minVolume)
-      }
       if (brands.length) {
         const brandQuery = getListQuery(index, brands);
         query += ` AND brand IN ${brandQuery}`
@@ -125,7 +121,6 @@ export class ProductDBProvider {
         values.push(...selectedStores)
       }
     }
-
     try {
       const { rows: products } = await db.query(query, values);
       return { products };

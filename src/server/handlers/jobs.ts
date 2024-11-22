@@ -1,5 +1,6 @@
 import { ProductDBProvider } from "../providers/ProductDBProvider";
 import { JobParams, JobType } from "./types";
+import { getMultipleCombinations } from "./utils";
 
 
 export async function fetchProductMapping(params: JobParams[JobType.PRODUCT_MAPPING], db: ProductDBProvider) {
@@ -76,10 +77,53 @@ export async function fetchAndRankByCategory(params: JobParams[JobType.CATEGORY_
     return {...result, rankingDetails};
 }
 
+export async function fetchAndRankByCategoryMultiple(params: JobParams[JobType.CATEGORY_SEARCH], db: ProductDBProvider) {
+    const { barcode, category, subCategories, brands, stores, minVolume, maxVolume } =
+        params;
+    const result = await db.getProductsByCategory(
+        barcode, 
+        category,
+        subCategories,
+        brands,
+        stores,
+        minVolume,
+        maxVolume
+    );
+    const rankingDetails = {
+        bestValueProductId: "",
+        bestValueProductAmount: Infinity,
+        averageValueAmount: 0
+    }
+
+    if (result.products && result.products.length) {
+        const multipleProducts = getMultipleCombinations(result.products, minVolume, maxVolume)
+        let bestValueProduct = {}
+        let totalProductValues = 0
+        for (const product of multipleProducts) {
+            const value = (product.price) / (product.category_volume)
+            totalProductValues += value
+            if (value < rankingDetails.bestValueProductAmount) {
+                rankingDetails.bestValueProductId = product.multipleId
+                rankingDetails.bestValueProductAmount = value
+                bestValueProduct = product
+            }
+        }
+        rankingDetails.averageValueAmount = totalProductValues/(multipleProducts.length || 1)
+        const sortedProducts = multipleProducts.sort((a, b) => {
+            const aValue = (a.price) / (a.category_volume)
+            const bValue = (b.price) / (b.category_volume)
+            return aValue - bValue
+        })
+        result.products = sortedProducts
+    }
+    return {...result, rankingDetails};
+}
+
 export const JobMapper: any = {
     [JobType.PRODUCT_MAPPING]: fetchProductMapping,
     [JobType.NAME_SEARCH]: fetchByName,
     [JobType.CATEGORY_SEARCH]: fetchByCategory,
     [JobType.CATEGORY_RANK]: fetchAndRankByCategory,
+    [JobType.CATEGORY_RANK_MULTIPLE]: fetchAndRankByCategoryMultiple,
     [JobType.FLAG_PRODUCT]: flagProduct
 }

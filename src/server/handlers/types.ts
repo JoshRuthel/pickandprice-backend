@@ -2,6 +2,31 @@ type NameParams = { name: string };
 
 type FlagParams = {id: string}
 
+export type ProductInfo = {
+  id: string,
+  title: string,
+  price: number,
+  sale_price: number,
+  barcode: string,
+  brand: string,
+  store: string,
+  volume: number,
+  unit: string,
+  promotion_id: string | null,
+  image_url: string,
+  category: string,
+  sub_category: string,
+  product_group: string,
+  self_assigned: boolean,
+  category_unit: string,
+  category_volume: number,
+  created_at: Date,
+  updated_at: Date,
+  is_flagged: boolean
+};
+
+export type MultipleProductInfo = ProductInfo & {multipleId: string, multipleCount: number}
+
 type CategoryParams = {
   barcode: string | null;
   category: string;
@@ -17,6 +42,7 @@ export enum JobType {
   NAME_SEARCH = "name-search",
   CATEGORY_SEARCH = "category-search",
   CATEGORY_RANK = "category_rank",
+  CATEGORY_RANK_MULTIPLE = 'category_rank_multiple',
   FLAG_PRODUCT = 'flag_product'
 }
 
@@ -27,6 +53,7 @@ export type JobParams = {
   [JobType.NAME_SEARCH]: NameParams;
   [JobType.CATEGORY_SEARCH]: CategoryParams;
   [JobType.CATEGORY_RANK]: CategoryParams;
+  [JobType.CATEGORY_RANK_MULTIPLE]: CategoryParams,
   [JobType.FLAG_PRODUCT]: FlagParams
 };
 
