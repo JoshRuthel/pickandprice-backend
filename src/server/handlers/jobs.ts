@@ -1,6 +1,6 @@
 import { ProductDBProvider } from "../providers/ProductDBProvider";
 import { JobParams, JobType } from "./types";
-import { getMultipleCombinations } from "./utils";
+import { getMultipleCombinations, getProductPrice } from "./utils";
 
 
 export async function fetchProductMapping(params: JobParams[JobType.PRODUCT_MAPPING], db: ProductDBProvider) {
@@ -95,26 +95,26 @@ export async function fetchAndRankByCategoryMultiple(params: JobParams[JobType.C
         averageValueAmount: 0
     }
 
+    const rankingProducts = []
     if (result.products && result.products.length) {
         const multipleProducts = getMultipleCombinations(result.products, minVolume, maxVolume)
         let bestValueProduct = {}
         let totalProductValues = 0
         for (const product of multipleProducts) {
-            const value = (product.price) / (product.category_volume)
+            const price = getProductPrice(product, 1)
+            const value = price / (product.category_volume*product.multipleCount)
             totalProductValues += value
             if (value < rankingDetails.bestValueProductAmount) {
                 rankingDetails.bestValueProductId = product.multipleId
                 rankingDetails.bestValueProductAmount = value
                 bestValueProduct = product
             }
+            rankingProducts.push({...product, value})
         }
         rankingDetails.averageValueAmount = totalProductValues/(multipleProducts.length || 1)
-        const sortedProducts = multipleProducts.sort((a, b) => {
-            const aValue = (a.price) / (a.category_volume)
-            const bValue = (b.price) / (b.category_volume)
-            return aValue - bValue
-        })
-        result.products = sortedProducts
+        const sortedProducts = rankingProducts.sort((a, b) => a.value - b.value)
+        const filteredProducts = sortedProducts.filter(prod => prod.multipleId == rankingDetails.bestValueProductId || prod.multipleCount < 2)
+        result.products = filteredProducts
     }
     return {...result, rankingDetails};
 }

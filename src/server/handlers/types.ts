@@ -13,6 +13,9 @@ export type ProductInfo = {
   volume: number,
   unit: string,
   promotion_id: string | null,
+  promotion_count: number,
+  promotion_price: number,
+  promotion_type: string
   image_url: string,
   category: string,
   sub_category: string,

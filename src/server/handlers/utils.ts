@@ -45,3 +45,8 @@ export function getMultipleCombinations(products: ProductInfo[], minVolume: numb
     }
     return multipleProducts
 }
+
+export function getProductPrice(product: MultipleProductInfo, count: number) {
+    const unitPrice = (product.multipleCount*count)%product.promotion_count == 0 ? product.promotion_price : product.price
+    return Number((Number(unitPrice * product.multipleCount) *count).toFixed(2))
+  }
