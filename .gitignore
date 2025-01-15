@@ -1,3 +1,5 @@
 node_modules
 .env
 /src/database/*.pem
+*.crt
+.DS_STORE
