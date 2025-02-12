@@ -1,5 +1,6 @@
 import { BrandMapping, CategoryMapping, MultipleProductInfo, ProductInfo } from "./types";
-import { v4 as uuid } from "uuid";
+import { v5 as uuidv5 } from 'uuid';
+const namespace = 'b6c4ff36-1d41-45b1-b4bb-6b2bc45a6f35'
 
 export function mapProductCategories(productResult: { error: unknown } | any[]) {
   if ("error" in productResult) {
@@ -37,10 +38,11 @@ export function getMultipleCombinations(products: ProductInfo[], minVolume: numb
   for (const product of products) {
     let count = 1;
     while (product.category_volume * count <= max) {
-      const multipleId = uuid();
+      const multipleId = generateGroupId(product.id, count);
       if (max == Infinity && count > 1) {
         if (product.promotion_count > 0) {
           const multipleCount = product.promotion_count;
+          const multipleId = generateGroupId(product.id, multipleCount);
           multipleProducts.push({ ...product, multipleId, multipleCount });
         }
         break;
@@ -59,4 +61,10 @@ export function getProductPrice(product: MultipleProductInfo, count: number) {
   const unitPrice =
     (product.multipleCount * count) % product.promotion_count == 0 ? product.promotion_price : product.price;
   return Number((Number(unitPrice * product.multipleCount) * count).toFixed(2));
+}
+
+export function generateGroupId(id: string, multipleCount: number) {
+  const inputString = `${id}~${multipleCount}`
+  const productGroupUuid = uuidv5(inputString, namespace)
+  return productGroupUuid
 }
