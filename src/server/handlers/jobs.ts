@@ -113,7 +113,7 @@ export async function fetchAndRankByCategoryMultiple(params: JobParams[JobType.C
         }
         rankingDetails.averageValueAmount = totalProductValues/(multipleProducts.length || 1)
         const sortedProducts = rankingProducts.sort((a, b) => a.value - b.value)
-        const filteredProducts = sortedProducts.filter(prod => prod.multipleId == rankingDetails.bestValueProductId || prod.multipleCount < 2)
+        const filteredProducts = sortedProducts.filter(prod => prod.multipleId == rankingDetails.bestValueProductId || prod.multipleCount < 2 || prod.multipleCount == prod.promotion_count)
         result.products = filteredProducts
     }
     return {...result, rankingDetails};
