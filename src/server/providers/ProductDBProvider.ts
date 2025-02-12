@@ -3,72 +3,72 @@ import { getListQuery } from "./productUtils";
 import { mapProductCategories } from "../handlers/utils";
 
 export class ProductDBProvider {
-  constructor() { }
+  constructor() {}
 
   async getProducts() {
-    const productQuery = 'SELECT * from products WHERE is_valid_volume AND is_valid_category AND price IS NOT NULL'
-    const insertMapQuery = 'INSERT INTO product_mapping (data) VALUES ($1)'
+    const productQuery = "SELECT * from products WHERE is_valid_volume AND is_valid_category AND price IS NOT NULL";
+    const insertMapQuery = "INSERT INTO product_mapping (data) VALUES ($1)";
     try {
-      const { rows: products } = await db.query(productQuery)
-      const product_cat = mapProductCategories(products)
-      if (!('error' in product_cat)) {
-        await db.query(insertMapQuery, [product_cat])
+      const { rows: products } = await db.query(productQuery);
+      const product_cat = mapProductCategories(products);
+      if (!("error" in product_cat)) {
+        await db.query(insertMapQuery, [product_cat]);
       }
-      return product_cat
+      return product_cat;
     } catch (e) {
-      console.error(e)
-      return { error: e }
+      console.error(e);
+      return { error: e };
     }
   }
 
   async getProductMapping() {
-    const productMapQuery = 'SELECT data from product_mapping LIMIT 1'
+    const productMapQuery = "SELECT data from product_mapping LIMIT 1";
     try {
-      const { rows: productMapping } = await db.query(productMapQuery)
-      return productMapping[0].data
+      const { rows: productMapping } = await db.query(productMapQuery);
+      return productMapping[0].data;
     } catch (e) {
-      console.error(e)
-      return { error: e }
+      console.error(e);
+      return { error: e };
     }
   }
 
   async flagProduct(id: string) {
-    const flagQuery = 'UPDATE products SET is_flagged = true WHERE id = $1'
+    const flagQuery = "UPDATE products SET is_flagged = true WHERE id = $1";
     try {
-      await db.query(flagQuery, [id])
-      return {}
+      await db.query(flagQuery, [id]);
+      return {};
     } catch (e) {
-      console.error(e)
-      return { error: e }
+      console.error(e);
+      return { error: e };
     }
   }
 
   async getProductBrands() {
-    const brandQuery = `SELECT * from product_brands`
+    const brandQuery = `SELECT * from product_brands`;
     try {
       const { rows: brands } = await db.query(brandQuery);
-      return brands
+      return brands;
     } catch (e) {
-      console.error(e)
+      console.error(e);
       return { error: e };
     }
   }
 
   async getProductsByName(name: string) {
     const query = `
-      SELECT *
+      SELECT DISTINCT ON (barcode) *
       FROM products
-      WHERE title ILIKE $1
+      WHERE to_tsvector('english', title) @@ plainto_tsquery('english', $1)
       AND is_valid_category
       AND is_valid_volume
-      ORDER BY SIMILARITY(title, $2) DESC
+      ORDER BY barcode, ts_rank(to_tsvector('english', title), plainto_tsquery('english', $1)) DESC
       LIMIT 10;
     `;
     try {
-      const { rows: products } = await db.query(query, [`%${name}%`, name]);
+      const { rows: products } = await db.query(query, [name]);
       return { products };
     } catch (e) {
-      console.error(e)
+      console.error(e);
       return { error: e };
     }
   }
@@ -83,14 +83,14 @@ export class ProductDBProvider {
     maxVolume: number
   ) {
     let query;
-    let values: any[] = []
+    let values: any[] = [];
 
     if (barcode != null) {
-      query = 'SELECT * from products where barcode = $1'
-      values = [barcode]
+      query = "SELECT * from products where barcode = $1";
+      values = [barcode];
     } else {
-      const selectedStores = Object.keys(stores).filter(key => stores[key])
-      values = [category]
+      const selectedStores = Object.keys(stores).filter((key) => stores[key]);
+      values = [category];
       let index = 2;
       query = `
           SELECT *
@@ -102,23 +102,23 @@ export class ProductDBProvider {
       `;
       if (subCategories.length) {
         const subCatQuery = getListQuery(index, subCategories);
-        query += ` AND sub_category in ${subCatQuery}`
-        index += subCategories.length
-        values.push(...subCategories)
+        query += ` AND sub_category in ${subCatQuery}`;
+        index += subCategories.length;
+        values.push(...subCategories);
       }
       if (maxVolume) {
-        query += ` AND category_volume <= $${index++} `
-        values.push(maxVolume)
+        query += ` AND category_volume <= $${index++} `;
+        values.push(maxVolume);
       }
       if (brands.length) {
         const brandQuery = getListQuery(index, brands);
-        query += ` AND brand IN ${brandQuery}`
-        values.push(...brands)
+        query += ` AND brand IN ${brandQuery}`;
+        values.push(...brands);
       }
       if (stores) {
         const storeQuery = getListQuery(index + brands.length, selectedStores);
-        query += ` AND store IN ${storeQuery}`
-        values.push(...selectedStores)
+        query += ` AND store IN ${storeQuery}`;
+        values.push(...selectedStores);
       }
     }
     try {
