@@ -30,7 +30,7 @@ router.post('/', async (req: Request, res: Response) => {
       accessToken,
       refreshToken,
       username: users[0].username,
-      email: users[0].email,
+      userId: users[0].id,
       firstName: users[0].first_name,
       lastName: users[0].last_name,
     });

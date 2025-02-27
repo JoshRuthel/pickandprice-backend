@@ -15,3 +15,11 @@ export const db = new Pool({
     ca: fs.readFileSync(path.join(__dirname, '../../ca-certificate.crt'))
   }
 });
+
+// export const db = new Pool({
+//   user: "postgres",
+//   host: "localhost",
+//   database: "do-pickandprice-local",
+//   password: "postgres",
+//   port: 5432,
+// });

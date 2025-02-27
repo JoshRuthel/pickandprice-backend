@@ -1,20 +1,20 @@
 import { db } from "../../database";
 import { getListQuery } from "./productUtils";
-import { mapProductCategories } from "../handlers/utils";
+import { mapProductCategories, productInfoDTO } from "../handlers/utils";
 
 export class ProductDBProvider {
   constructor() {}
 
   async getProducts() {
-    const productQuery = "SELECT * from products WHERE is_valid_volume AND is_valid_category AND price IS NOT NULL";
+    const productQuery = "SELECT * from products WHERE is_valid_volume AND is_valid_category AND price IS NOT NULL AND category NOT IN ('Sweets', 'Dessert - Cakes, Tarts & Puddings', 'Deli Meals', 'Cake Toppings & Sprinkles')";
     const insertMapQuery = "INSERT INTO product_mapping (data) VALUES ($1)";
     try {
       const { rows: products } = await db.query(productQuery);
-      const product_cat = mapProductCategories(products);
-      if (!("error" in product_cat)) {
-        await db.query(insertMapQuery, [product_cat]);
+      const productMapping = mapProductCategories(products);
+      if (!("error" in productMapping)) {
+        await db.query(insertMapQuery, [productMapping]);
       }
-      return product_cat;
+      return productMapping;
     } catch (e) {
       console.error(e);
       return { error: e };
@@ -61,11 +61,13 @@ export class ProductDBProvider {
       WHERE to_tsvector('english', title) @@ plainto_tsquery('english', $1)
       AND is_valid_category
       AND is_valid_volume
+      AND category NOT IN ('Sweets', 'Dessert - Cakes, Tarts & Puddings', 'Deli Meals', 'Cake Toppings & Sprinkles')
       ORDER BY barcode, ts_rank(to_tsvector('english', title), plainto_tsquery('english', $1)) DESC
       LIMIT 10;
     `;
     try {
-      const { rows: products } = await db.query(query, [name]);
+      const { rows: dbProducts } = await db.query(query, [name]);
+      const products = dbProducts.map(product => productInfoDTO(product))
       return { products };
     } catch (e) {
       console.error(e);
@@ -89,7 +91,7 @@ export class ProductDBProvider {
       query = "SELECT * from products where barcode = $1";
       values = [barcode];
     } else {
-      const selectedStores = Object.keys(stores).filter((key) => stores[key]);
+      const selectedStores = Object.keys(stores);
       values = [category];
       let index = 2;
       query = `
@@ -122,8 +124,19 @@ export class ProductDBProvider {
       }
     }
     try {
-      const { rows: products } = await db.query(query, values);
+      const { rows: dbProducts } = await db.query(query, values);
+      const products = dbProducts.map(product => productInfoDTO(product))
       return { products };
+    } catch {
+      return { products: [], error: "An error occurred" };
+    }
+  }
+
+  async getTemplate(id: string) {
+    const query = 'SELECT * FROM user_templates WHERE id = $1'
+    try {
+      const {rows: template} = await db.query(query, [id])
+      return template[0]
     } catch {
       return { error: "An error occurred" };
     }
