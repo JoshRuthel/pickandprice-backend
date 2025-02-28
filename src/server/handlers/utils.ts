@@ -31,31 +31,66 @@ export function mapStoreBrands(brandResult: { error: unknown } | any[]) {
   return storeBrandMapping;
 }
 
-export function getMultipleCombinations(products: ProductInfo[], minVolume: number, maxVolume: number) {
-  const multipleProducts: MultipleProductInfo[] = [];
+export function getBestValueProduct(product: ProductInfo, minVolume: number, maxVolume: number) {
   const min = minVolume == null ? 0 : minVolume;
   const max = maxVolume == null ? Infinity : maxVolume;
-  for (const product of products) {
+  let multipleId: string;
+  let bestValueProduct: MultipleProductInfo | null = null;
+  if (max == Infinity) {
+    if (product.promotionCount > 1) { // override the promotional count if range is infinite
+      multipleId = generateGroupId(product.id, product.promotionCount);
+      bestValueProduct = { ...product, multipleId, multipleCount: product.promotionCount };
+    } else if (product.categoryVolume >= minVolume) { // check the product volume confines to constraint
+      multipleId = generateGroupId(product.id, 1);
+      bestValueProduct = { ...product, multipleId, multipleCount: 1 };
+    }
+  } else {
     let count = 1;
+    let isPromotion = false;
+    let isSet = false;
+    let multipleId = generateGroupId(product.id, count);
     while (product.categoryVolume * count <= max) {
-      const multipleId = generateGroupId(product.id, count);
-      if (max == Infinity && count > 1) {
-        if (product.promotionCount > 1) {
-          const multipleCount = product.promotionCount;
-          const multipleId = generateGroupId(product.id, multipleCount);
-          multipleProducts.push({ ...product, multipleId, multipleCount });
+      if (product.categoryVolume * count >= min) {
+        if (!isSet || (!isPromotion && count == product.promotionCount)) {
+          // only override if current bestValue is not on promotion and current count is
+          bestValueProduct = { ...product, multipleId, multipleCount: count };
+          isSet = true;
+          isPromotion = count == product.promotionCount;
         }
-        break;
-      }
-      if (min <= product.categoryVolume * count && product.categoryVolume * count <= max) {
-        const multipleCount = count;
-        multipleProducts.push({ ...product, multipleId, multipleCount });
       }
       count++;
     }
   }
-  return multipleProducts;
+  return bestValueProduct;
 }
+
+// export function getMultipleCombinations(products: ProductInfo[], minVolume: number, maxVolume: number) {
+//   const multipleProducts: MultipleProductInfo[] = [];
+//   const min = minVolume == null ? 0 : minVolume;
+//   const max = maxVolume == null ? Infinity : maxVolume;
+//   for (const product of products) {
+//     let count = 1;
+//     let multipleId;
+//     while (product.categoryVolume * count <= max) {
+//       multipleId = generateGroupId(product.id, count);
+//       if (max == Infinity) {
+//         if (product.promotionCount > 1) {
+//           const multipleId = generateGroupId(product.id, product.promotionCount);
+//           multipleProducts.push({ ...product, multipleId, multipleCount: product.promotionCount });
+//         } else {
+//           multipleProducts.push({ ...product, multipleId, multipleCount: count });
+//         }
+//         break;
+//       }
+//       if (min <= product.categoryVolume * count && product.categoryVolume * count <= max) {
+//         const multipleCount = count;
+//         multipleProducts.push({ ...product, multipleId, multipleCount });
+//       }
+//       count++;
+//     }
+//   }
+//   return multipleProducts;
+// }
 
 export function getProductPrice(product: MultipleProductInfo, count: number) {
   const unitPrice =

@@ -80,7 +80,6 @@ export enum JobType {
   NAME_SEARCH = "name-search",
   CATEGORY_SEARCH = "category-search",
   CATEGORY_RANK = "category_rank",
-  CATEGORY_RANK_MULTIPLE = "category_rank_multiple",
   FLAG_PRODUCT = "flag_product",
   TEMPLATE_SHOP = "template_shopt",
 }
@@ -98,7 +97,6 @@ export type JobParams = {
   [JobType.NAME_SEARCH]: NameParams;
   [JobType.CATEGORY_SEARCH]: CategoryParams;
   [JobType.CATEGORY_RANK]: CategoryParams;
-  [JobType.CATEGORY_RANK_MULTIPLE]: CategoryParams;
   [JobType.FLAG_PRODUCT]: FlagParams;
   [JobType.TEMPLATE_SHOP]: TemplateParams;
 };
