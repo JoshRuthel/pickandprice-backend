@@ -20,7 +20,7 @@ router.post("/save", async (req: Request, res: Response) => {
 router.post("/get", async (req: Request, res: Response) => {
   const { userId } = req.body;
   try {
-    const saveQuery = "SELECT * from user_shops where user_id = $1";
+    const saveQuery = "SELECT * from user_shops where user_id = $1 ORDER BY shop_date DESC";
     const { rows } = await db.query(saveQuery, [userId]);
     const shops = rows.map((row) => ({
       id: row.id,
