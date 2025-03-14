@@ -133,5 +133,6 @@ export function productInfoDTO(dbProduct: DBProductInfo): ProductInfo {
     createdAt: dbProduct.created_at,
     updatedAt: dbProduct.updated_at,
     isFlagged: dbProduct.is_flagged,
+    isVitality: dbProduct.is_vitality
   };
 }

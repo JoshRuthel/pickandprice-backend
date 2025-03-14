@@ -28,6 +28,7 @@ export type DBProductInfo = {
   created_at: Date;
   updated_at: Date;
   is_flagged: boolean;
+  is_vitality: boolean;
 };
 
 export type ProductInfo = {
@@ -54,6 +55,7 @@ export type ProductInfo = {
   createdAt: Date;
   updatedAt: Date;
   isFlagged: boolean;
+  isVitality: boolean
 };
 
 export type MultipleProductInfo = ProductInfo & { multipleId: string; multipleCount: number };
