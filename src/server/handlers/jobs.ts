@@ -3,7 +3,7 @@ import { JobParams, JobType, MultipleProductInfo, ProductReturn, Template, Templ
 import { caclulateSavings, getBestValueProduct, getProductPrice } from "./utils";
 
 export async function fetchProductMapping(params: JobParams[JobType.PRODUCT_MAPPING], db: ProductDBProvider) {
-  const productResult = await db.getProducts();
+  const productResult = await db.getProductMapping();
   return productResult;
 }
 
