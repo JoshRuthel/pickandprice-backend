@@ -40,7 +40,7 @@ export function getBestValueProduct(product: ProductInfo, minVolume: number, max
     if (product.promotionCount > 1) { // override the promotional count if range is infinite
       multipleId = generateGroupId(product.id, product.promotionCount);
       bestValueProduct = { ...product, multipleId, multipleCount: product.promotionCount };
-    } else if (product.categoryVolume >= minVolume) { // check the product volume confines to constraint
+    } else if (product.categoryVolume >= min) { // check the product volume confines to constraint
       multipleId = generateGroupId(product.id, 1);
       bestValueProduct = { ...product, multipleId, multipleCount: 1 };
     }
