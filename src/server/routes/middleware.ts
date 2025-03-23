@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { ApiError, AppRequest } from "../../types";
 import jwt, { JwtPayload } from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET!;
+const JWT_SECRET = process.env.JWT_SECRET || "secret";
 
 export const authenticateUser = (req: AppRequest, res: Response, next: NextFunction) => {
   if (req.path === "/account/login" || req.path === "/account/signup") {
