@@ -1,5 +1,5 @@
 import { ProductDBProvider } from "../providers/ProductDBProvider";
-import { JobParams, JobType, MultipleProductInfo, ProductReturn, Template, TemplateReturn } from "./types";
+import { JobParams, JobType, MultipleProductInfo, ProductReturn, Template, TemplateReturn }  from "../../types";
 import { caclulateSavings, getBestValueProduct, getProductPrice } from "./utils";
 
 export async function fetchProductMapping(params: JobParams[JobType.PRODUCT_MAPPING], db: ProductDBProvider) {
@@ -36,13 +36,13 @@ export async function fetchAndRankByCategory(
     bestValueProductAmount: Infinity,
     averageValueAmount: 0,
   };
-
+  const isMinVolumeConstraint = minVolume > 0;
   const rankingProducts = [];
   if (result.products && result.products.length) {
     let totalProductValues = 0;
     for (const dbProduct of result.products) {
       const product = getBestValueProduct(dbProduct, minVolume, maxVolume);
-      if(!product) continue;
+      if (!product) continue;
       const price = getProductPrice(product, 1);
       const value = price / (product.categoryVolume * product.multipleCount);
       totalProductValues += value;
@@ -54,7 +54,11 @@ export async function fetchAndRankByCategory(
     }
     rankingDetails.averageValueAmount = totalProductValues / (result.products.length || 1);
     const sortedProducts = rankingProducts.sort((a, b) => a.value - b.value);
-    result.products = sortedProducts;
+    const filteredProducts = sortedProducts.filter(
+      (prod) =>
+        prod.multipleCount == 1 || prod.multipleId == rankingDetails.bestValueProductId || !isMinVolumeConstraint
+    );
+    result.products = filteredProducts;
   }
   return { error: result.error, products: result.products as MultipleProductInfo[], rankingDetails };
 }
@@ -70,10 +74,7 @@ export async function fetchProductsForTemplate(params: JobParams[JobType.TEMPLAT
     const brands = Object.keys(searchState.brands);
     const minVolume = searchState.minVolume ?? 0;
     const maxVolume = searchState.maxVolume ?? Infinity;
-    const products = await fetchAndRankByCategory(
-      { ...searchState, subCategories, brands, maxVolume, minVolume },
-      db
-    );
+    const products = await fetchAndRankByCategory({ ...searchState, subCategories, brands, maxVolume, minVolume }, db);
     if (products?.products) {
       const valueProduct = products.products[0];
       const { multipleCount, multipleId, promotionPrice, price, promotionCount, categoryVolume } = valueProduct;

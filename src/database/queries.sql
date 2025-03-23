@@ -29,6 +29,14 @@ CREATE TABLE
         savings_total FLOAT NOT NULL
     )
 
+CREATE TABLE
+    refresh_tokens(
+        id uuid PRIMARY KEY UNIQUE
+        user_id uuid NOT NULL,
+        token text NOT NULL,
+        expires_at TIMESTAMP
+    )
+
 CREATE
 OR REPLACE FUNCTION update_timestamp () RETURNS TRIGGER AS '
 BEGIN

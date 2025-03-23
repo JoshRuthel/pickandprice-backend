@@ -1,4 +1,4 @@
-import { BrandMapping, CategoryMapping, DBProductInfo, MultipleProductInfo, ProductInfo } from "./types";
+import { BrandMapping, CategoryMapping, DBProductInfo, MultipleProductInfo, ProductInfo } from "../../types";
 import { v5 as uuidv5 } from "uuid";
 const namespace = "b6c4ff36-1d41-45b1-b4bb-6b2bc45a6f35";
 
@@ -37,12 +37,15 @@ export function getBestValueProduct(product: ProductInfo, minVolume: number, max
   let multipleId: string;
   let bestValueProduct: MultipleProductInfo | null = null;
   if (max == Infinity) {
-    if (product.promotionCount > 1) { // override the promotional count if range is infinite
+    if (product.promotionCount > 1) {
+      // override the promotional count if range is infinite
       multipleId = generateGroupId(product.id, product.promotionCount);
       bestValueProduct = { ...product, multipleId, multipleCount: product.promotionCount };
-    } else if (product.categoryVolume >= min) { // check the product volume confines to constraint
-      multipleId = generateGroupId(product.id, 1);
-      bestValueProduct = { ...product, multipleId, multipleCount: 1 };
+    } else {
+      const minCount = Math.ceil(min / product.categoryVolume);
+      const multipleCount = minCount == 0 ? 1 : minCount;
+      multipleId = generateGroupId(product.id, multipleCount);
+      bestValueProduct = { ...product, multipleId, multipleCount };
     }
   } else {
     let count = 1;
@@ -63,34 +66,6 @@ export function getBestValueProduct(product: ProductInfo, minVolume: number, max
   }
   return bestValueProduct;
 }
-
-// export function getMultipleCombinations(products: ProductInfo[], minVolume: number, maxVolume: number) {
-//   const multipleProducts: MultipleProductInfo[] = [];
-//   const min = minVolume == null ? 0 : minVolume;
-//   const max = maxVolume == null ? Infinity : maxVolume;
-//   for (const product of products) {
-//     let count = 1;
-//     let multipleId;
-//     while (product.categoryVolume * count <= max) {
-//       multipleId = generateGroupId(product.id, count);
-//       if (max == Infinity) {
-//         if (product.promotionCount > 1) {
-//           const multipleId = generateGroupId(product.id, product.promotionCount);
-//           multipleProducts.push({ ...product, multipleId, multipleCount: product.promotionCount });
-//         } else {
-//           multipleProducts.push({ ...product, multipleId, multipleCount: count });
-//         }
-//         break;
-//       }
-//       if (min <= product.categoryVolume * count && product.categoryVolume * count <= max) {
-//         const multipleCount = count;
-//         multipleProducts.push({ ...product, multipleId, multipleCount });
-//       }
-//       count++;
-//     }
-//   }
-//   return multipleProducts;
-// }
 
 export function getProductPrice(product: MultipleProductInfo, count: number) {
   const unitPrice =
@@ -117,22 +92,41 @@ export function caclulateSavings(
 }
 
 export function productInfoDTO(dbProduct: DBProductInfo): ProductInfo {
+  const {
+    sale_price,
+    promotion_id,
+    promotion_count,
+    promotion_price,
+    promotion_type,
+    image_url,
+    sub_category,
+    product_group,
+    self_assigned,
+    category_unit,
+    category_volume,
+    created_at,
+    updated_at,
+    is_flagged,
+    is_vitality,
+    ...rest // This will include all the other fields from dbProduct
+  } = dbProduct;
+
   return {
-    ...dbProduct,
-    salePrice: dbProduct.sale_price,
-    promotionId: dbProduct.promotion_id,
-    promotionCount: dbProduct.promotion_count,
-    promotionPrice: dbProduct.promotion_price,
-    promotionType: dbProduct.promotion_type,
-    imageUrl: dbProduct.image_url,
-    subCategory: dbProduct.sub_category,
-    productGroup: dbProduct.product_group,
-    selfAssigned: dbProduct.self_assigned,
-    categoryUnit: dbProduct.category_unit,
-    categoryVolume: dbProduct.category_volume,
-    createdAt: dbProduct.created_at,
-    updatedAt: dbProduct.updated_at,
-    isFlagged: dbProduct.is_flagged,
-    isVitality: dbProduct.is_vitality
+    ...rest, // Spread the remaining fields
+    salePrice: sale_price,
+    promotionId: promotion_id,
+    promotionCount: promotion_count,
+    promotionPrice: promotion_price,
+    promotionType: promotion_type,
+    imageUrl: image_url,
+    subCategory: sub_category,
+    productGroup: product_group,
+    selfAssigned: self_assigned,
+    categoryUnit: category_unit,
+    categoryVolume: category_volume,
+    createdAt: created_at,
+    updatedAt: updated_at,
+    isFlagged: is_flagged,
+    isVitality: is_vitality,
   };
 }
