@@ -31,10 +31,18 @@ CREATE TABLE
 
 CREATE TABLE
     refresh_tokens(
-        id uuid PRIMARY KEY UNIQUE
+        id uuid PRIMARY KEY UNIQUE,
         user_id uuid NOT NULL,
         token text NOT NULL,
         expires_at TIMESTAMP
+    )
+
+CREATE TABLE
+    feeback(
+        id uuid PRIMARY KEY UNIQUE,
+        user_id uuid NOT NULL,
+        comments text NOT NULL,
+        created_at TIMESTAMP
     )
 
 CREATE
