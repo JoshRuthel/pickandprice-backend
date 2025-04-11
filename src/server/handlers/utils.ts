@@ -31,7 +31,7 @@ export function mapStoreBrands(brandResult: { error: unknown } | any[]) {
   return storeBrandMapping;
 }
 
-export function getBestValueProduct(product: ProductInfo, minVolume: number, maxVolume: number) {
+export function getBestValueProduct(product: ProductInfo, minVolume: number| null, maxVolume: number | null) {
   const min = minVolume == null ? 0 : minVolume;
   const max = maxVolume == null ? Infinity : maxVolume;
   let multipleId: string;
@@ -42,7 +42,7 @@ export function getBestValueProduct(product: ProductInfo, minVolume: number, max
       multipleId = generateGroupId(product.id, product.promotionCount);
       bestValueProduct = { ...product, multipleId, multipleCount: product.promotionCount };
     } else {
-      const minCount = Math.ceil(min / product.categoryVolume);
+      const minCount = Math.ceil(min / (product.categoryVolume ?? 1));
       const multipleCount = minCount == 0 ? 1 : minCount;
       multipleId = generateGroupId(product.id, multipleCount);
       bestValueProduct = { ...product, multipleId, multipleCount };

@@ -7,12 +7,12 @@ export class ProductDBProvider {
 
   async getProducts() {
     const productQuery = "SELECT * from products WHERE is_valid_volume AND is_valid_category AND price IS NOT NULL AND category NOT IN ('Sweets', 'Dessert - Cakes, Tarts & Puddings', 'Deli Meals', 'Cake Toppings & Sprinkles')";
-    const insertMapQuery = "INSERT INTO product_mapping (data) VALUES ($1)";
+    const insertMapQuery = "UPDATE product_mapping SET data = $1 WHERE id = 1";
     try {
       const { rows: products } = await db.query(productQuery);
       const productMapping = mapProductCategories(products);
       if (!("error" in productMapping)) {
-        await db.query(insertMapQuery, [productMapping]);
+        await db.query(insertMapQuery, [productMapping] as any);
       }
       return productMapping;
     } catch (e) {
@@ -58,9 +58,8 @@ export class ProductDBProvider {
     const query = `
       SELECT DISTINCT ON (barcode) *
       FROM products
-      WHERE to_tsvector('english', title) @@ plainto_tsquery('english', $1)
-      AND is_valid_category
-      AND is_valid_volume
+      WHERE to_tsvector('english', title) @@ websearch_to_tsquery('english', $1)
+      AND price is NOT NULL
       AND category NOT IN ('Sweets', 'Dessert - Cakes, Tarts & Puddings', 'Deli Meals', 'Cake Toppings & Sprinkles')
       ORDER BY barcode, ts_rank(to_tsvector('english', title), plainto_tsquery('english', $1)) DESC
       LIMIT 10;

@@ -44,7 +44,10 @@ export async function fetchAndRankByCategory(
       const product = getBestValueProduct(dbProduct, minVolume, maxVolume);
       if (!product) continue;
       const price = getProductPrice(product, 1);
-      const value = price / (product.categoryVolume * product.multipleCount);
+      let value = price / (product.categoryVolume * product.multipleCount);
+      if(product.categoryVolume == null) {
+        value = price/(product.volume * product.multipleCount)
+      }
       totalProductValues += value;
       if (value < rankingDetails.bestValueProductAmount) {
         rankingDetails.bestValueProductId = product.multipleId;
@@ -60,7 +63,7 @@ export async function fetchAndRankByCategory(
     );
     result.products = filteredProducts;
   }
-  return { error: result.error, products: result.products as MultipleProductInfo[], rankingDetails };
+  return { error: result.error, products: result.products as (MultipleProductInfo & {value: number})[], rankingDetails };
 }
 
 export async function fetchProductsForTemplate(params: JobParams[JobType.TEMPLATE_SHOP], db: ProductDBProvider) {
@@ -77,11 +80,10 @@ export async function fetchProductsForTemplate(params: JobParams[JobType.TEMPLAT
     const products = await fetchAndRankByCategory({ ...searchState, subCategories, brands, maxVolume, minVolume }, db);
     if (products?.products) {
       const valueProduct = products.products[0];
-      const { multipleCount, multipleId, promotionPrice, price, promotionCount, categoryVolume } = valueProduct;
-      const unitPrice = multipleCount == promotionCount ? promotionPrice : price;
+      const { multipleCount, multipleId, promotionPrice, price, promotionCount, categoryVolume, value } = valueProduct;
       const { averageValueAmount } = products.rankingDetails;
       const { valueSavings, productSavings } = caclulateSavings(
-        unitPrice / categoryVolume,
+        value,
         averageValueAmount,
         categoryVolume,
         multipleCount

@@ -7,7 +7,7 @@ const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET || "refreshSecret"
 
 export function generateTokens(userId: string) {
   const accessToken = jwt.sign({ userId }, JWT_SECRET, {
-    expiresIn: "15min",
+    expiresIn: 7200,
   });
   const refreshToken = jwt.sign({ userId }, REFRESH_TOKEN_SECRET, { expiresIn: "2h" });
   const expirationTime = new Date();

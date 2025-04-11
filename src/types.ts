@@ -160,7 +160,7 @@ export type TemplateReturn = {
 };
 
 export type ProductReturn = {
-  products: MultipleProductInfo[];
+  products: (MultipleProductInfo & {value: number})[];
   error?: string;
   rankingDetails: { bestValueProductId: string; bestValueProductAmount: number; averageValueAmount: number };
 };
