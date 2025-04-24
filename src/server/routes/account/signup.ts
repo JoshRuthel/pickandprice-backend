@@ -11,7 +11,7 @@ const router = express.Router();
 router.post(
   "/",
   errorWrapper(async (req: AppRequest, res: Response, next: NextFunction) => {
-    const { firstName, lastName, username, password } = req.body;
+    const { firstName, lastName, username, email, password } = req.body;
     const checkUserQuery = `SELECT * FROM users WHERE username = $1`;
     const { rows: users } = await db.query(checkUserQuery, [username]);
     if (users.length > 0) throw { status: 409, message: "Username already exists" };
@@ -19,8 +19,9 @@ router.post(
     const passwordHash = await bcrypt.hash(password, salt);
 
     const id = uuid();
-    const insertUserQuery = `INSERT INTO users (id, first_name, last_name, username, password_hash) VALUES ($1, $2, $3, $4, $5)`;
-    await db.query(insertUserQuery, [id, firstName, lastName, username, passwordHash]);
+    const insertUserQuery = `INSERT INTO users (id, first_name, last_name, username, email, password_hash) VALUES ($1, $2, $3, $4, $5, $6)`;
+    const created_at = new Date()
+    await db.query(insertUserQuery, [id, firstName, lastName, username, email, passwordHash]);
 
     const { accessToken, refreshToken } = generateTokens(id);
 
@@ -33,6 +34,8 @@ router.post(
         username,
         firstName,
         lastName,
+        email,
+        created_at: created_at.toDateString(),
         userId: id,
       },
     });

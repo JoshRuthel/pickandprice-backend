@@ -16,7 +16,7 @@ router.post(
     if (users.length === 0) throw { status: 404, message: "User not found" };
 
     const isValidPassword = bcrypt.compareSync(password, users[0].password_hash);
-    if (!isValidPassword) throw { status: 401, message: "Incorrect password" };
+    if (!isValidPassword) throw { status: 404, message: "Incorrect password" };
 
     const { accessToken, refreshToken } = generateTokens(users[0].id);
 
@@ -30,6 +30,8 @@ router.post(
         userId: users[0].id,
         firstName: users[0].first_name,
         lastName: users[0].last_name,
+        createdAt: users[0].created_at,
+        email: users[0].email
       },
     });
   })

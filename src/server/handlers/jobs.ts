@@ -45,7 +45,7 @@ export async function fetchAndRankByCategory(
       if (!product) continue;
       const price = getProductPrice(product, 1);
       let value = price / (product.categoryVolume * product.multipleCount);
-      if(product.categoryVolume == null) {
+      if(product.categoryVolume === null) {
         value = price/(product.volume * product.multipleCount)
       }
       totalProductValues += value;
@@ -59,7 +59,7 @@ export async function fetchAndRankByCategory(
     const sortedProducts = rankingProducts.sort((a, b) => a.value - b.value);
     const filteredProducts = sortedProducts.filter(
       (prod) =>
-        prod.multipleCount == 1 || prod.multipleId == rankingDetails.bestValueProductId || !isMinVolumeConstraint
+        prod.multipleCount === 1 || prod.multipleId === rankingDetails.bestValueProductId || !isMinVolumeConstraint
     );
     result.products = filteredProducts;
   }

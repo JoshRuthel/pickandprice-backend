@@ -32,18 +32,18 @@ export function mapStoreBrands(brandResult: { error: unknown } | any[]) {
 }
 
 export function getBestValueProduct(product: ProductInfo, minVolume: number| null, maxVolume: number | null) {
-  const min = minVolume == null ? 0 : minVolume;
-  const max = maxVolume == null ? Infinity : maxVolume;
+  const min = minVolume === null ? 0 : minVolume;
+  const max = maxVolume === null ? Infinity : maxVolume;
   let multipleId: string;
   let bestValueProduct: MultipleProductInfo | null = null;
-  if (max == Infinity) {
+  if (max === Infinity) {
     if (product.promotionCount > 1) {
       // override the promotional count if range is infinite
       multipleId = generateGroupId(product.id, product.promotionCount);
       bestValueProduct = { ...product, multipleId, multipleCount: product.promotionCount };
     } else {
       const minCount = Math.ceil(min / (product.categoryVolume ?? 1));
-      const multipleCount = minCount == 0 ? 1 : minCount;
+      const multipleCount = minCount === 0 ? 1 : minCount;
       multipleId = generateGroupId(product.id, multipleCount);
       bestValueProduct = { ...product, multipleId, multipleCount };
     }
@@ -54,11 +54,11 @@ export function getBestValueProduct(product: ProductInfo, minVolume: number| nul
     let multipleId = generateGroupId(product.id, count);
     while (product.categoryVolume * count <= max) {
       if (product.categoryVolume * count >= min) {
-        if (!isSet || (!isPromotion && count == product.promotionCount)) {
+        if (!isSet || (!isPromotion && count === product.promotionCount)) {
           // only override if current bestValue is not on promotion and current count is
           bestValueProduct = { ...product, multipleId, multipleCount: count };
           isSet = true;
-          isPromotion = count == product.promotionCount;
+          isPromotion = count === product.promotionCount;
         }
       }
       count++;
@@ -69,7 +69,7 @@ export function getBestValueProduct(product: ProductInfo, minVolume: number| nul
 
 export function getProductPrice(product: MultipleProductInfo, count: number) {
   const unitPrice =
-    (product.multipleCount * count) % product.promotionCount == 0 ? product.promotionPrice : product.price;
+    (product.multipleCount * count) % product.promotionCount === 0 ? product.promotionPrice : product.price;
   return Number((Number(unitPrice * product.multipleCount) * count).toFixed(2));
 }
 
