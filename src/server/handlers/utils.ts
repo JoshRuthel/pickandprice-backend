@@ -32,8 +32,8 @@ export function mapStoreBrands(brandResult: { error: unknown } | any[]) {
 }
 
 export function getBestValueProduct(product: ProductInfo, minVolume: number| null, maxVolume: number | null) {
-  const min = minVolume === null ? 0 : minVolume;
-  const max = maxVolume === null ? Infinity : maxVolume;
+  const min = minVolume == null ? 0 : minVolume;
+  const max = maxVolume == null ? Infinity : maxVolume;
   let multipleId: string;
   let bestValueProduct: MultipleProductInfo | null = null;
   if (max === Infinity) {
