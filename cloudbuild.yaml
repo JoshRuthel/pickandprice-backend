@@ -26,20 +26,20 @@ steps:
           --image gcr.io/balmy-mile-438210-b9/pickandprice-backend \
           --platform managed \
           --region africa-south1 \
-          --allow-unauthenticated
-          '--update-secrets=DB_HOST=DB_HOST:latest,\
-          DB_USERNAME=DB_USERNAME:latest,\
-          DB_PASSWORD=DB_PASSWORD:latest,\
-          DB_DATABASE=DB_DATABASE:latest,\
-          DB_HOST=DB_HOST:latest,\
-          GCP_PROJECT_ID=GCP_PROJECT_ID:latest,\
-          GCP_BUCKET_NAME=GCP_BUCKET_NAME:latest,\
-          CA_CERT=db-ca-cert:latest',\
-          JWT_SECRET=JWT_SECRET:latest,\
-          REFRESH_TOKEN_SECRET=REFRESH_TOKEN_SECRET:latest,\
-          EMAIL_USER=EMAIL_USER:latest,\
-          EMAIL_PASS=EMAIL_PASS:latest,\
-          EMAIL_FROM=EMAIL_FROM:latest
+          --allow-unauthenticated \
+          --update-secrets="DB_HOST=DB_HOST:latest,
+          DB_USERNAME=DB_USERNAME:latest,
+          DB_PASSWORD=DB_PASSWORD:latest,
+          DB_DATABASE=DB_DATABASE:latest,
+          DB_HOST=DB_HOST:latest,
+          GCP_PROJECT_ID=GCP_PROJECT_ID:latest,
+          GCP_BUCKET_NAME=GCP_BUCKET_NAME:latest,
+          CA_CERT=db-ca-cert:latest,
+          JWT_SECRET=JWT_SECRET:latest,
+          REFRESH_TOKEN_SECRET=REFRESH_TOKEN_SECRET:latest,
+          EMAIL_USER=EMAIL_USER:latest,
+          EMAIL_PASS=EMAIL_PASS:latest,
+          EMAIL_FROM=EMAIL_FROM:latest"
           
 options:
   logging: CLOUD_LOGGING_ONLY
