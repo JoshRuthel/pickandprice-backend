@@ -12,7 +12,7 @@ export const db = new Pool({
   password: process.env.DB_PASSWORD,
   port: 25060,
   ssl: {
-    ca: fs.readFileSync(path.join(__dirname, '../../ca-certificate.crt'))
+    ca: process.env.CA_CERT
   }
 });
 

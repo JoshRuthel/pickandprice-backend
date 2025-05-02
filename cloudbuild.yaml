@@ -1,23 +1,5 @@
 steps:
-    # Step 1: Retrieve the backend-env secret and save it to .env
-  - name: 'gcr.io/cloud-builders/gcloud'
-    id: 'Fetch DB certificate'
-    waitFor: ['-']
-    entrypoint: 'sh'
-    args:
-      - '-c'
-      - 'gcloud secrets versions access latest --secret=db-ca-cert > ca-certificate.crt'
-
-  # Step 2: Retrieve the db-ca-cert secret and save it to /app/src/database/ca-certificate.crt
-  - name: 'gcr.io/cloud-builders/gcloud'
-    id: 'Fetch ENV certificate'
-    waitFor: ['-']
-    entrypoint: 'sh'
-    args:
-      - '-c'
-      - 'gcloud secrets versions access latest --secret=backend-env > .env'
-
-  # Step 3: Build the Docker image
+  # Step 1: Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Build Docker image'
     args:
@@ -26,14 +8,14 @@ steps:
       - 'gcr.io/balmy-mile-438210-b9/pickandprice-backend'
       - '.'
 
-  # Step 4: Push the Docker image
+  # Step 2: Push the Docker image
   - name: 'gcr.io/cloud-builders/docker'
     id: 'Push Docker image'
     args:
       - 'push'
       - 'gcr.io/balmy-mile-438210-b9/pickandprice-backend'
 
-  # Step 5: Deploy to Cloud Run
+  # Step 3: Deploy to Cloud Run
   - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
     id: 'Deploy to Cloud Run'
     entrypoint: 'bash'
@@ -45,6 +27,19 @@ steps:
           --platform managed \
           --region africa-south1 \
           --allow-unauthenticated
+          '--update-secrets=DB_HOST=DB_HOST:latest,\
+          DB_USERNAME=DB_USERNAME:latest,\
+          DB_PASSWORD=DB_PASSWORD:latest,\
+          DB_DATABASE=DB_DATABASE:latest,\
+          DB_HOST=DB_HOST:latest,\
+          GCP_PROJECT_ID=GCP_PROJECT_ID:latest,\
+          GCP_BUCKET_NAME=GCP_BUCKET_NAME:latest,\
+          CA_CERT=db-ca-cert:latest',\
+          JWT_SECRET=JWT_SECRET:latest,\
+          REFRESH_TOKEN_SECRET=REFRESH_TOKEN_SECRET:latest,\
+          EMAIL_USER=EMAIL_USER:latest,\
+          EMAIL_PASS=EMAIL_PASS:latest,\
+          EMAIL_FROM=EMAIL_FROM:latest
           
 options:
   logging: CLOUD_LOGGING_ONLY

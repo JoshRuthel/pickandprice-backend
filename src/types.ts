@@ -8,7 +8,7 @@ export interface ApiError {
   message: string;
 }
 
-export type AppRequest = Request & { body : {userId?: string}};
+export type AppRequest = Request & { body: { userId?: string } };
 
 import { Request } from "express";
 
@@ -125,7 +125,11 @@ export type JobRequest<T extends JobType> = Request & {
 };
 
 export type CategoryMapping = {
-  [key: string]: { subCategories: { [key: string]: { [key: string]: { [key: string]: true } } }; unit: string };
+  [key: string]: {
+    subCategories: { [key: string]: { [key: string]: { [key: string]: true } } };
+    unit: string;
+    modeVolume: number;
+  };
 };
 export type BrandMapping = { [key: string]: string[] };
 
@@ -160,7 +164,7 @@ export type TemplateReturn = {
 };
 
 export type ProductReturn = {
-  products: (MultipleProductInfo & {value: number})[];
+  products: (MultipleProductInfo & { value: number })[];
   error?: string;
   rankingDetails: { bestValueProductId: string; bestValueProductAmount: number; averageValueAmount: number };
 };

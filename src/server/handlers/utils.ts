@@ -6,17 +6,34 @@ export function mapProductCategories(productResult: { error: unknown } | any[]) 
   if ("error" in productResult) {
     return productResult;
   }
-  const productMapping: CategoryMapping = {};
+  const productMapping: any = {};
   for (const product of productResult) {
-    if (!productMapping[product.category])
-      productMapping[product.category] = { subCategories: {}, unit: product.category_unit };
+    if (!productMapping[product.category]) {
+      productMapping[product.category] = { subCategories: {}, unit: product.category_unit, volumes: {[product.category_volume]: 1} };
+    } else {
+      if(productMapping[product.category].volumes[product.category_volume]) productMapping[product.category].volumes[product.category_volume]++
+      else productMapping[product.category].volumes[product.category_volume] = 1
+    }
     if (!productMapping[product.category].subCategories[product.sub_category])
       productMapping[product.category].subCategories[product.sub_category] = {};
     if (!productMapping[product.category].subCategories[product.sub_category][product.store])
       productMapping[product.category].subCategories[product.sub_category][product.store] = {};
     productMapping[product.category].subCategories[product.sub_category][product.store][product.brand] = true;
   }
-  return productMapping;
+  const finalProductMapping: CategoryMapping = {}
+  for(const category in productMapping) {
+    let modeVolume = 0
+    let modeCount = -Infinity
+    for(const volume in productMapping[category].volumes) {
+      if(productMapping[category].volumes[volume] > modeCount) {
+        modeCount = productMapping[category].volumes[volume]
+        modeVolume = Number(volume)
+      }
+    }
+    const {volumes, ...rest} = productMapping[category]
+    finalProductMapping[category] = {...rest, modeVolume}
+  }
+  return finalProductMapping;
 }
 
 export function mapStoreBrands(brandResult: { error: unknown } | any[]) {
