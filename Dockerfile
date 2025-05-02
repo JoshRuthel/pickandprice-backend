@@ -2,10 +2,6 @@ FROM node:18-alpine
 
 WORKDIR /app
 
-# Copy the .env file and ca-certificate.crt file into the Docker image
-COPY .env .env
-COPY ca-certificate.crt ca-certificate.crt
-
 # Install dependencies
 COPY package*.json ./
 RUN npm install
