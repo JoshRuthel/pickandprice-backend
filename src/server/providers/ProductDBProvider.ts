@@ -6,7 +6,8 @@ export class ProductDBProvider {
   constructor() {}
 
   async getProducts() {
-    const productQuery = "SELECT * from products WHERE is_valid_volume AND is_valid_category AND price IS NOT NULL AND category NOT IN ('Sweets', 'Dessert - Cakes, Tarts & Puddings', 'Deli Meals', 'Cake Toppings & Sprinkles')";
+    const productQuery =
+      "SELECT * from products WHERE is_valid_volume AND is_valid_category AND price IS NOT NULL AND category NOT IN ('Sweets', 'Dessert - Cakes, Tarts & Puddings', 'Deli Meals', 'Cake Toppings & Sprinkles') AND updated_at >= (SELECT MIN(last_scrape) from product_scrape_log)";
     const insertMapQuery = "UPDATE product_mapping SET data = $1 WHERE id = 1";
     try {
       const { rows: products } = await db.query(productQuery);
@@ -61,12 +62,13 @@ export class ProductDBProvider {
       WHERE to_tsvector('english', title) @@ websearch_to_tsquery('english', $1)
       AND price is NOT NULL
       AND category NOT IN ('Sweets', 'Dessert - Cakes, Tarts & Puddings', 'Deli Meals', 'Cake Toppings & Sprinkles')
+      AND updated_at >= (SELECT MIN(last_scrape) from product_scrape_log)
       ORDER BY barcode, ts_rank(to_tsvector('english', title), plainto_tsquery('english', $1)) DESC
       LIMIT 10;
     `;
     try {
       const { rows: dbProducts } = await db.query(query, [name]);
-      const products = dbProducts.map(product => productInfoDTO(product))
+      const products = dbProducts.map((product) => productInfoDTO(product));
       return { products };
     } catch (e) {
       console.error(e);
@@ -97,6 +99,7 @@ export class ProductDBProvider {
           SELECT *
           FROM products
           WHERE price IS NOT NULL
+          AND updated_at >= (SELECT MIN(last_scrape) from product_scrape_log)
           AND is_valid_category
           AND is_valid_volume
           AND category = $1
@@ -124,7 +127,7 @@ export class ProductDBProvider {
     }
     try {
       const { rows: dbProducts } = await db.query(query, values);
-      const products = dbProducts.map(product => productInfoDTO(product))
+      const products = dbProducts.map((product) => productInfoDTO(product));
       return { products };
     } catch {
       return { products: [], error: "An error occurred" };
@@ -132,10 +135,10 @@ export class ProductDBProvider {
   }
 
   async getTemplate(id: string) {
-    const query = 'SELECT * FROM user_templates WHERE id = $1'
+    const query = "SELECT * FROM user_templates WHERE id = $1";
     try {
-      const {rows: template} = await db.query(query, [id])
-      return template[0]
+      const { rows: template } = await db.query(query, [id]);
+      return template[0];
     } catch {
       return { error: "An error occurred" };
     }

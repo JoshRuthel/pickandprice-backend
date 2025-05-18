@@ -9,10 +9,15 @@ export function mapProductCategories(productResult: { error: unknown } | any[]) 
   const productMapping: any = {};
   for (const product of productResult) {
     if (!productMapping[product.category]) {
-      productMapping[product.category] = { subCategories: {}, unit: product.category_unit, volumes: {[product.category_volume]: 1} };
+      productMapping[product.category] = {
+        subCategories: {},
+        unit: product.category_unit,
+        volumes: { [product.category_volume]: 1 },
+      };
     } else {
-      if(productMapping[product.category].volumes[product.category_volume]) productMapping[product.category].volumes[product.category_volume]++
-      else productMapping[product.category].volumes[product.category_volume] = 1
+      if (productMapping[product.category].volumes[product.category_volume])
+        productMapping[product.category].volumes[product.category_volume]++;
+      else productMapping[product.category].volumes[product.category_volume] = 1;
     }
     if (!productMapping[product.category].subCategories[product.sub_category])
       productMapping[product.category].subCategories[product.sub_category] = {};
@@ -20,18 +25,18 @@ export function mapProductCategories(productResult: { error: unknown } | any[]) 
       productMapping[product.category].subCategories[product.sub_category][product.store] = {};
     productMapping[product.category].subCategories[product.sub_category][product.store][product.brand] = true;
   }
-  const finalProductMapping: CategoryMapping = {}
-  for(const category in productMapping) {
-    let modeVolume = 0
-    let modeCount = -Infinity
-    for(const volume in productMapping[category].volumes) {
-      if(productMapping[category].volumes[volume] > modeCount) {
-        modeCount = productMapping[category].volumes[volume]
-        modeVolume = Number(volume)
+  const finalProductMapping: CategoryMapping = {};
+  for (const category in productMapping) {
+    let modeVolume = 0;
+    let modeCount = -Infinity;
+    for (const volume in productMapping[category].volumes) {
+      if (productMapping[category].volumes[volume] > modeCount) {
+        modeCount = productMapping[category].volumes[volume];
+        modeVolume = Number(volume);
       }
     }
-    const {volumes, ...rest} = productMapping[category]
-    finalProductMapping[category] = {...rest, modeVolume}
+    const { volumes, ...rest } = productMapping[category];
+    finalProductMapping[category] = { ...rest, modeVolume };
   }
   return finalProductMapping;
 }
@@ -48,7 +53,7 @@ export function mapStoreBrands(brandResult: { error: unknown } | any[]) {
   return storeBrandMapping;
 }
 
-export function getBestValueProduct(product: ProductInfo, minVolume: number| null, maxVolume: number | null) {
+export function getBestValueProduct(product: ProductInfo, minVolume: number | null, maxVolume: number | null) {
   const min = minVolume == null ? 0 : minVolume;
   const max = maxVolume == null ? Infinity : maxVolume;
   let multipleId: string;
