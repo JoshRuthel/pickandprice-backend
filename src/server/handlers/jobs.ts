@@ -39,8 +39,6 @@ export async function fetchAndRankByCategory(
   const isMinVolumeConstraint = minVolume > 0;
   const rankingProducts = [];
   if (result.products && result.products.length) {
-    let totalProductValues = 0;
-    let totalProductCount = 0
     for (const dbProduct of result.products) {
       const product = getBestValueProduct(dbProduct, minVolume, maxVolume);
       if (!product) continue;
@@ -49,20 +47,20 @@ export async function fetchAndRankByCategory(
       if(product.categoryVolume === null) {
         value = price/(product.volume * product.multipleCount)
       }
-      totalProductValues += value;
-      totalProductCount++
       if (value < rankingDetails.bestValueProductAmount) {
         rankingDetails.bestValueProductId = product.multipleId;
         rankingDetails.bestValueProductAmount = value;
       }
       rankingProducts.push({ ...product, value });
     }
-    rankingDetails.averageValueAmount = totalProductValues / totalProductCount;
     const sortedProducts = rankingProducts.sort((a, b) => a.value - b.value);
     const filteredProducts = sortedProducts.filter(
       (prod) =>
         prod.multipleCount === 1 || prod.multipleId === rankingDetails.bestValueProductId || !isMinVolumeConstraint
     );
+    const totalProductValues = filteredProducts.reduce((acc, prod) => acc + prod.value, 0);
+    const totalProductCount = filteredProducts.length
+    if (totalProductCount > 0) rankingDetails.averageValueAmount = totalProductValues / totalProductCount;
     result.products = filteredProducts;
   }
   return { error: result.error, products: result.products as (MultipleProductInfo & {value: number})[], rankingDetails };
