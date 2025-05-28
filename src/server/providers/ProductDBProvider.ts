@@ -7,7 +7,7 @@ export class ProductDBProvider {
 
   async getProducts() {
     const productQuery =
-      "SELECT * from products WHERE is_valid_volume AND is_valid_category AND price IS NOT NULL AND category NOT IN ('Sweets', 'Dessert - Cakes, Tarts & Puddings', 'Deli Meals', 'Cake Toppings & Sprinkles') AND updated_at >= (SELECT MIN(last_scrape) from product_scrape_log)";
+      "SELECT * from products WHERE is_valid_volume AND is_valid_category AND price IS NOT NULL AND category NOT IN ('Sweets', 'Dessert - Cakes, Tarts & Puddings', 'Deli Meals', 'Cake Toppings & Sprinkles') AND updated_price_at > CURRENT_TIMESTAMP - INTERVAL '6 days'";
     const insertMapQuery = "UPDATE product_mapping SET data = $1 WHERE id = 1";
     try {
       const { rows: products } = await db.query(productQuery);
@@ -62,7 +62,7 @@ export class ProductDBProvider {
       WHERE to_tsvector('english', title) @@ websearch_to_tsquery('english', $1)
       AND price is NOT NULL
       AND category NOT IN ('Sweets', 'Dessert - Cakes, Tarts & Puddings', 'Deli Meals', 'Cake Toppings & Sprinkles')
-      AND updated_at >= (SELECT MIN(last_scrape) from product_scrape_log)
+      AND updated_price_at > CURRENT_TIMESTAMP - INTERVAL '6 days'
       ORDER BY barcode, ts_rank(to_tsvector('english', title), plainto_tsquery('english', $1)) DESC
       LIMIT 10;
     `;
@@ -99,7 +99,7 @@ export class ProductDBProvider {
           SELECT *
           FROM products
           WHERE price IS NOT NULL
-          AND updated_at >= (SELECT MIN(last_scrape) from product_scrape_log)
+          AND updated_price_at > CURRENT_TIMESTAMP - INTERVAL '6 days'
           AND is_valid_category
           AND is_valid_volume
           AND category = $1
