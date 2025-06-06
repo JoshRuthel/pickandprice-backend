@@ -26,6 +26,11 @@ steps:
           --image gcr.io/balmy-mile-438210-b9/pickandprice-backend \
           --platform managed \
           --region africa-south1 \
+          --memory 1Gi \
+          --cpu 1 \
+          --concurrency 80 \
+          --min-instances 1 \
+          --max-instances 3 \
           --allow-unauthenticated \
           --update-secrets="DB_HOST=DB_HOST:latest,
           DB_USERNAME=DB_USERNAME:latest,
