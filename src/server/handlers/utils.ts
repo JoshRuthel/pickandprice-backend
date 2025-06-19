@@ -23,6 +23,7 @@ export function mapProductCategories(productResult: { error: unknown } | any[]) 
       productMapping[product.category].subCategories[product.sub_category] = {};
     if (!productMapping[product.category].subCategories[product.sub_category][product.store])
       productMapping[product.category].subCategories[product.sub_category][product.store] = {};
+    if(!product.brand) continue;
     productMapping[product.category].subCategories[product.sub_category][product.store][product.brand] = true;
   }
   const finalProductMapping: CategoryMapping = {};
